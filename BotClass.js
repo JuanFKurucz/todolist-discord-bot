@@ -12,38 +12,33 @@ const CommandHandler = require(__dirname+"/CommandHandlerClass.js");
 
 module.exports = class Bot {
   constructor(prefix) {
-    this.todolistChannel=null;
+    this.todolistChannel="519704135319289856";
     this.prefix = prefix;
     this.client = new Discord.Client();
-    this.ch = new CommandHandler();
+    this.ch = new CommandHandler(this.client);
   }
 
   start(token){
     this.client.on('ready', () => {
       console.log(`Logged in as ${this.client.user.tag}!`);
+      this.ch.awaitMessageReactions();
     });
 
     this.client.on('message', msg => {
       this.onMessage(msg);
     });
 
-    this.client.on('messageReactionAdd', (msg,user) => {
-      this.onReaction(msg,user,true);
-    });
-
-    this.client.on('messageReactionRemove', (msg,user) => {
-      this.onReaction(msg,user,false);
-    });
-
-
     this.client.login(token);
+
   }
 
   commandHandler(msg){
     let response = "";
     let text = msg.content+"";
+    console.log("Message: "+text);
     var self = this;
     this.ch.getUser(msg.author,function(user){
+      console.log(user);
       if(text.indexOf(self.prefix)===0){
         text=text.substring(self.prefix.length,text.length).toLowerCase();
         var command = text.split(" ");
@@ -74,8 +69,8 @@ module.exports = class Bot {
 
   onReaction(msg,user,added){
     if(msg.channel===this.todolistChannel){
-      let text = msg.content+"";
-      this.commandHandler(msg);
+      //let text = msg.content+"";
+      //this.commandHandler(msg);
     }
   }
 }

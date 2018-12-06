@@ -27,6 +27,11 @@ class DataBase {
 }
 
 const database = new DataBase();
-module.exports = function query(string,callback){
-  database.con.query(string,callback);
+module.exports = {
+  dbupdate: function (string,object,callback){
+    database.con.query(string,object,callback);
+  },
+  dbquery: function (string,callback){
+    database.con.query(string,callback);
+  }
 }
