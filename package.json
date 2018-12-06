@@ -1,0 +1,24 @@
+{
+  "name": "another-discord-game-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanFKurucz/another-discord-game-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JuanFKurucz/another-discord-game-bot/issues"
+  },
+  "homepage": "https://github.com/JuanFKurucz/another-discord-game-bot#readme",
+  "dependencies": {
+    "big-integer": "^1.6.36",
+    "discord.js": "^11.4.2",
+    "mysql": "^2.16.0"
+  }
+}
