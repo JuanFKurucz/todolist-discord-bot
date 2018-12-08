@@ -19,8 +19,8 @@ module.exports = class User {
     return this.activity;
   }
 
-  createActivity(){
-    this.activity = new Activity(this);
+  createActivity(client){
+    this.activity = new Activity(this,client);
   }
 
   cancelActivity(){

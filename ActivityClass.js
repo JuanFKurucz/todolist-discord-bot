@@ -1,17 +1,68 @@
 'use strict';
 
 const {dbupdate} = require(__dirname+"/DataBaseClass.js");
+const Message = require('discord.js').RichEmbed;
 
 
 module.exports = class Activity {
-  constructor(user) {
+  constructor(user,client) {
     this.owner=user;
+    this.message = new Message();
+    this.messageId=null;
+    this.title="Sample activity title";
     this.description="";
     this.tasks=[];
+    this.client=client;
+    var self=this;
+
+    this.message.setTitle(this.title);
+
+    client.channels.find("name","to-do-list").send(this.message)
+    .then(message => {
+      this.messageId=message.id;
+    }).catch(console.error);
+  }
+
+  getMessage(callback){
+    if(this.messageId!=null){
+      this.client.channels.find("name","to-do-list").fetchMessage(this.messageId)
+      .then(message => {
+        callback(message);
+      })
+      .catch(console.error);
+    } else {
+      callback(null);
+    }
+  }
+
+  editMessage(message,newContent,callback){
+    message.edit(newContent)
+    .then(msg => callback(msg))
+    .catch(console.error);
   }
 
   setDescription(des){
+    var self = this;
     this.description=des;
+    this.getMessage(function(msg){
+      var m = new Message(msg.embeds[0]);
+      m.setDescription(self.description);
+      self.editMessage(msg,m,function(){
+        console.log("done");
+      });
+    });
+  }
+
+  setTitle(title){
+    var self = this;
+    this.title=title;
+    this.getMessage(function(msg){
+      var m = new Message(msg.embeds[0]);
+      m.setTitle(self.title);
+      self.editMessage(msg,m,function(){
+        console.log("done");
+      });
+    });
   }
 
   addTask(des){

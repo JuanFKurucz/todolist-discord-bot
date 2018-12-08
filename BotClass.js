@@ -12,7 +12,7 @@ const CommandHandler = require(__dirname+"/CommandHandlerClass.js");
 
 module.exports = class Bot {
   constructor(prefix) {
-    this.todolistChannel="519704135319289856";
+    this.todolistChannel = "519704135319289856";
     this.prefix = prefix;
     this.client = new Discord.Client();
     this.ch = new CommandHandler(this.client);
@@ -47,9 +47,13 @@ module.exports = class Bot {
 
         if(typeof self.ch[call] === 'function'){
           response = self.ch[call](user,command,function(response){
-            msg.channel.send(response)
-            .then(message => console.log(`Sent message: ${message.content}`))
-            .catch(console.error);
+            if(response !== null){
+              response.setFooter(self.client.user.username);
+              response.setTimestamp(new Date());
+              msg.channel.send(response)
+              .then(message => console.log(`Sent message: ${message.content}`))
+              .catch(console.error);
+            }
           });
         } else {
           msg.channel.send("Unknown command")
