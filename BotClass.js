@@ -47,12 +47,14 @@ module.exports = class Bot {
 
         if(typeof self.ch[call] === 'function'){
           response = self.ch[call](user,command,function(response){
-            if(response !== null){
+            if(response !== null && response !== "delete"){
               response.setFooter(self.client.user.username);
               response.setTimestamp(new Date());
               msg.channel.send(response)
               .then(message => console.log(`Sent message: ${message.content}`))
               .catch(console.error);
+            } else if(response === "delete"){
+              msg.delete();
             }
           });
         } else {

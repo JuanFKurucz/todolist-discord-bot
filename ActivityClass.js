@@ -9,13 +9,10 @@ module.exports = class Activity {
     this.owner=user;
     this.message = new Message();
     this.messageId=null;
-    this.title="Sample activity title";
-    this.description="";
-    this.tasks=[];
     this.client=client;
     var self=this;
 
-    this.message.setTitle(this.title);
+    this.message.setTitle("Sample activity title");
 
     client.channels.find("name","to-do-list").send(this.message)
     .then(message => {
@@ -35,38 +32,41 @@ module.exports = class Activity {
     }
   }
 
-  editMessage(message,newContent,callback){
-    message.edit(newContent)
-    .then(msg => callback(msg))
-    .catch(console.error);
+  editMessage(){
+    var self = this;
+    this.getMessage(function(msg){
+      msg.edit(self.message)
+      .catch(console.error);
+    });
   }
 
   setDescription(des){
-    var self = this;
-    this.description=des;
-    this.getMessage(function(msg){
-      var m = new Message(msg.embeds[0]);
-      m.setDescription(self.description);
-      self.editMessage(msg,m,function(){
-        console.log("done");
-      });
-    });
+    this.message.setDescription(des);
+    this.editMessage();
   }
 
   setTitle(title){
-    var self = this;
-    this.title=title;
-    this.getMessage(function(msg){
-      var m = new Message(msg.embeds[0]);
-      m.setTitle(self.title);
-      self.editMessage(msg,m,function(){
-        console.log("done");
-      });
-    });
+    this.message.setTitle(title);
+    this.editMessage();
   }
 
-  addTask(des){
-    this.tasks.push(des);
+  setTaskTitle(title,number=-1){
+    if(number==-1){
+      console.log(title);
+      this.message.addField(title,"...");
+    } else if(number>=0 && number<this.message.fields.length) {
+      this.message.fields[number].name = title;
+    }
+    this.editMessage();
+  }
+
+  setTaskDescription(des,number=-1){
+    if(number==-1){
+      this.message.fields[this.message.fields.length-1].value = des;
+    } else if(number>=0 && number<this.message.fields.length) {
+      this.message.fields[number].value = des;
+    }
+    this.editMessage();
   }
 
   jsUcfirst(string){

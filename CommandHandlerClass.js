@@ -98,12 +98,10 @@ module.exports = class CommandHandler {
       */
     }
     m.addField("Set the title","Use '.title Name' to set the activity title");
-    m.addField("Add a task","Use '.task Title' to add a task");
-    m.addField("Add a task description","Use '.task Number Description' to add a task description");
+    m.addField("Set a task title","Use '.taskT Number Title' to add a task");
+    m.addField("Set a task description","Use '.taskD Number Description' to add a task description");
     //m.addField("Add a task requirement","Use '.task Title' to add a task");
     //m.addBlankField();
-    m.addField("Edit a task title","Use '.etask Number Title' to add a task");
-    m.addField("Edit a task description","Use '.etaskdesc Number Description' to add a task description");
     m.addBlankField();
     m.addField("Remove a task","Use '.rtask Number' or '.rtask Description' to remove a task");
     //m.addBlankField();
@@ -149,14 +147,55 @@ module.exports = class CommandHandler {
     callback(m);
   }
 
-  execute_task(user,command,callback){
+
+    /**
+        Activity Creation
+    **/
+  getRestOfCommand(command,startPoint=1){
+    var c=command;
+    for(var i=0;i<startPoint;i++){
+      c.shift();
+    }
+    return c.join(" ");
+  }
+
+  execute_title(user,command,callback){
     var activity = user.getActivity();
     if(activity!==null){
-      var c = command[0];
-      command.shift();
-      var desc = command.join(" ");
-      activity.setTitle(desc);
+      activity.setTitle(this.getRestOfCommand(command));
     }
-    callback(null);
+    callback("delete");
+  }
+
+  execute_desc(user,command,callback){
+    var activity = user.getActivity();
+    if(activity!==null){
+      activity.setDescription(this.getRestOfCommand(command));
+    }
+    callback("delete");
+  }
+
+  execute_taskt(user,command,callback){
+    var activity = user.getActivity();
+    if(activity!==null){
+      if(command.length>=3 && !isNaN(command[1])){
+        activity.setTaskTitle(this.getRestOfCommand(command,2),parseInt(command[1]));
+      } else {
+        activity.setTaskTitle(this.getRestOfCommand(command,1));
+      }
+    }
+    callback("delete");
+  }
+
+  execute_taskd(user,command,callback){
+    var activity = user.getActivity();
+    if(activity!==null){
+      if(command.length>=3 && !isNaN(command[1])){
+        activity.setTaskDescription(this.getRestOfCommand(command,2),parseInt(command[1]));
+      } else {
+        activity.setTaskDescription(this.getRestOfCommand(command,1));
+      }
+    }
+    callback("delete");
   }
 }
