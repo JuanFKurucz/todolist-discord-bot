@@ -14,19 +14,32 @@ module.exports = class Bot {
   constructor(prefix) {
     this.todolistChannel = "519704135319289856";
     this.prefix = prefix;
-    this.client = new Discord.Client();
+    this.client = new Discord.Client({ autofetch: [
+        'MESSAGE_CREATE',
+        'MESSAGE_UPDATE',
+        'MESSAGE_REACTION_ADD',
+        'MESSAGE_REACTION_REMOVE',
+    ]});
     this.ch = new CommandHandler(this);
   }
 
   start(token){
     this.client.on('ready', () => {
       console.log(`Logged in as ${this.client.user.tag}!`);
+
+
+      var channel = this.client.channels.find("name","general");
+      channel.fetchMessages()
+      .then(message => console.log(message.content))
+      .catch(console.error);
       this.ch.awaitMessageReactions();
     });
 
     this.client.on('message', msg => {
       this.onMessage(msg);
     });
+
+    this.client.on('messageReactionAdd', (messageReaction, user) => console.log(messageReaction, user))
 
     this.client.login(token);
   }
@@ -76,13 +89,6 @@ module.exports = class Bot {
   onMessage(msg){
     if(msg.hasOwnProperty("author") && !msg.author.bot){
       this.commandHandler(msg);
-    }
-  }
-
-  onReaction(msg,user,added){
-    if(msg.channel===this.todolistChannel){
-      //let text = msg.content+"";
-      //this.commandHandler(msg);
     }
   }
 }

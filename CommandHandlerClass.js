@@ -25,17 +25,17 @@ module.exports = class CommandHandler {
 
   async awaitMessageReactions(){
     var channel = this.client.channels.find("name",this.channelToDo);
-    let results = await dbQuery("SELECT id_activity, id_message FROM activity WHERE completed IS NULL");
+    /*let results = await dbQuery("SELECT id_activity, id_message FROM activity WHERE completed IS NULL");
     for(var r in results){
       var a = new Await(results[r].id_activity,results[r].id_message);
       this.awaits[a.id_message] = a;
+      console.log(a.id_message);
       let message = await channel.fetchMessage(a.id_message);
-      message.awaitReactions(function(reaction,user){
-        console.log(reaction);
-        console.log(user);
-      });
+      message.awaitReactions()
+      .then(collected => console.log(collected))
+      .catch(console.error)
     }
-    console.log(results);
+    console.log(results);*/
   }
 
   async getUser(info){
