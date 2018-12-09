@@ -15,7 +15,7 @@ module.exports = class Bot {
     this.todolistChannel = "519704135319289856";
     this.prefix = prefix;
     this.client = new Discord.Client();
-    this.ch = new CommandHandler(this.client);
+    this.ch = new CommandHandler(this);
   }
 
   start(token){
@@ -29,42 +29,52 @@ module.exports = class Bot {
     });
 
     this.client.login(token);
+  }
 
+  isCommand(text){
+    return text.indexOf(this.prefix)===0;
+  }
+
+  parseCommand(text){
+    var command=text.substring(this.prefix.length,text.length).toLowerCase();
+    return command.split(" ");
   }
 
   async commandHandler(msg){
-    let response = "";
+    let response = null;
     let text = msg.content+"";
-    var self = this;
-    var user = await this.ch.getUser(msg.author);
-    if(text.indexOf(self.prefix)===0){
-      text=text.substring(self.prefix.length,text.length).toLowerCase();
-      var command = text.split(" ");
+    let user = await this.ch.getUser(msg.author);
+    if(this.isCommand(text)){
+      var command = this.parseCommand(text);
+      let call = this.ch.functionPrefix+command[0];
 
-      let call = self.ch.functionPrefix+command[0];
-
-      if(typeof self.ch[call] === 'function'){
-        response = await self.ch[call](user,command);
+      if(typeof this.ch[call] === 'function'){
+        response = await this.ch[call](user,command);
         if(response !== null && response !== "delete"){
-          response.setFooter(self.client.user.username);
+          response.setFooter(this.client.user.username);
           response.setTimestamp(new Date());
-          msg.channel.send(response)
-          .then(message => console.log(`Sent message: ${message.content}`))
-          .catch(console.error);
+          this.sendMessage(msg.channel,response);
         } else if(response === "delete"){
           msg.delete();
         }
       } else {
-        msg.channel.send("Unknown command")
-        .then(message => console.log(`Sent message: ${message.content}`))
-        .catch(console.error);
+        this.sendMessage(msg.channel,"Unknown command");
       }
     }
   }
 
+  async sendMessage(channel,message){
+    let msg;
+    try {
+      msg = await channel.send(message);
+    } catch(e) {
+      msg = null;
+    }
+    return msg;
+  }
+
   onMessage(msg){
     if(msg.hasOwnProperty("author") && !msg.author.bot){
-      let text = msg.content+"";
       this.commandHandler(msg);
     }
   }

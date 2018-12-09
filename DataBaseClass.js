@@ -48,6 +48,7 @@ class DataBase {
     try {
       response = await this.queryPromise(sql,object);
     } catch(e){
+      console.error(e);
       response = null;
     }
     return response;

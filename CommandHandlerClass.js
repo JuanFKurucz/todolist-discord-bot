@@ -11,43 +11,31 @@ const dump_channel = "519704135319289856";
 const User = require(__dirname+"/UserClass.js");
 const Await = require(__dirname+"/AwaitClass.js");
 const { dbQuery } = require(__dirname+"/DataBaseClass.js");
-
 const Message = require('discord.js').RichEmbed;
 
-
-var BotSelf;
-
 module.exports = class CommandHandler {
-  constructor(client) {
+  constructor(bot) {
+    this.channelToDo="general";
     this.functionPrefix = "execute_";
     this.users={};
-    this.client=client;
+    this.bot=bot;
+    this.client=bot.client;
     this.awaits={};
-    BotSelf = this;
   }
 
-  awaitMessageReactions(){
-    var self = this;
-    var channel = this.client.channels.find("name","to-do-list");
-    /*db.query("SELECT id_activity, id_message FROM activity WHERE completed IS NULL",function(error, results, fields){
-      if(error){
-        console.log(error);
-      } else {
-        for(var r in results){
-          var a = new Await(results[r].id_activity,results[r].id_message);
-          self.awaits[a.id_message] = a;
-          channel.fetchMessage(a.id_message)
-          .then(message => {
-            message.awaitReactions(function(reaction,user){
-              console.log(reaction);
-              console.log(user);
-            });
-          })
-          .catch(console.error);
-        }
-        console.log(results);
-      }
-    });*/
+  async awaitMessageReactions(){
+    var channel = this.client.channels.find("name",this.channelToDo);
+    let results = await dbQuery("SELECT id_activity, id_message FROM activity WHERE completed IS NULL");
+    for(var r in results){
+      var a = new Await(results[r].id_activity,results[r].id_message);
+      this.awaits[a.id_message] = a;
+      let message = await channel.fetchMessage(a.id_message);
+      message.awaitReactions(function(reaction,user){
+        console.log(reaction);
+        console.log(user);
+      });
+    }
+    console.log(results);
   }
 
   async getUser(info){
@@ -63,50 +51,34 @@ module.exports = class CommandHandler {
   async execute_info(user,command){
     var m = new Message();
     let results = await dbQuery("SELECT * FROM user WHERE id_user = "+user.id);
-    console.log(results);
+    let description="User not found";
     if (!results) {
-      m.setDescription("Unexpected error")
-    } else {
-      if(results.length>0){
-        m.setDescription("<@!"+results[0].id_user+"> you have permission level "+results[0].permission);
-      } else {
-        m.setDescription("User not found");
-      }
+      description="Unexpected error";
+    } else if(results.length>0){
+      description="<@!"+results[0].id_user+"> you have permission level "+results[0].permission;
     }
+    m.setDescription(description);
     return m;
   }
 
   async execute_add(user,command){
     var m = new Message();
-    m.setTitle("Add activity");
     var activity = user.getActivity();
+    let description="<@!"+user.id+"> you are already creating an activity, here is the list of commands";
     if(activity===null){
       user.createActivity(this.client);
-      m.setDescription("<@!"+user.id+"> welcome to the activity creator, here is the list of commands")
-    } else {
-      m.setDescription("<@!"+user.id+"> you are already creating an activity, here is the list of commands");
-      /*
-      var c = command[0];
-      command.shift();
-      var desc = command.join(" ");
-      if(activity.description==="") {
-        activity.setDescription(desc);
-      } else {
-        activity.addTask(desc);
-      }
-      m.setDescription("<@!"+user.id+"> write ."+c+" following the description of a task to complete. Write .end to stop creating the activity and .cancel to stop and delete the activity.");
-      */
+      description="<@!"+user.id+"> welcome to the activity creator, here is the list of commands";
     }
+
+    m.setTitle("Add activity");
+    m.setDescription(description);
     m.addField("Set the title","Use '.title Name' to set the activity title");
     m.addField("Set a task title","Use '.taskT Number Title' to add a task");
     m.addField("Set a task description","Use '.taskD Number Description' to add a task description");
-    //m.addField("Add a task requirement","Use '.task Title' to add a task");
-    //m.addBlankField();
-    m.addBlankField();
     m.addField("Remove a task","Use '.rtask Number' or '.rtask Description' to remove a task");
-    //m.addBlankField();
     m.addField("Cancel creating the activity","Use '.cancel' to delete the current activity and stop creating it");
     m.addField("Save the activity and exit","Use '.end' to save the activity and exit the creation");
+
     return m;
   }
 
@@ -114,21 +86,18 @@ module.exports = class CommandHandler {
     var m = new Message();
     m.setTitle("End activity");
     var activity = user.getActivity();
-    if(activity===null){
-      m.setDescription("<@!"+user.id+"> you are not creating an activity");
-    } else {
-      this.client.channels.find("name","to-do-list").send(activity.print())
-      .then(async function(message){
-        var o={
-          "id_message":message.id,
-          "id_channel":message.channel.id,
-          "id_server":message.guild.id
-        }
-        var response = await activity.save(o);
-        user.cancelActivity();
-        m.setDescription("<@!"+user.id+"> "+response);
-      }).catch(console.error);
+    let description = "<@!"+user.id+"> you are not creating an activity";
+    if(activity!==null){
+      var o={
+        "id_message":activity.messageId,
+        "id_channel":activity.channelId,
+        "id_server":activity.guildId
+      }
+      var response = await activity.save(o);
+      user.cancelActivity();
+      description = "<@!"+user.id+"> "+response;
     }
+    m.setDescription(description);
     return m;
   }
 
@@ -136,12 +105,12 @@ module.exports = class CommandHandler {
     var m = new Message();
     m.setTitle("Cancel activity");
     var activity = user.getActivity();
-    if(activity===null){
-      m.setDescription("<@!"+user.id+"> you are not creating an activity");
-    } else {
+    let description = "<@!"+user.id+"> you are not creating an activity";
+    if(activity!==null){
       user.cancelActivity();
-      m.setDescription("<@!"+user.id+"> activity was cancelled successfully");
+      description = "<@!"+user.id+"> activity was cancelled successfully";
     }
+    m.setDescription(description);
     return m;
   }
 

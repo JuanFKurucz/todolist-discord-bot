@@ -1,28 +1,33 @@
 'use strict';
 
-const db = require(__dirname+"/DataBaseClass.js");
+const { dbQuery } = require(__dirname+"/DataBaseClass.js");
 const Message = require('discord.js').RichEmbed;
 
 
 module.exports = class Activity {
   constructor(user,client) {
+    this.channelToDo="general";
     this.owner=user;
     this.message = new Message();
     this.messageId=null;
+    this.channelId=null;
+    this.guildId=null;
     this.client=client;
     var self=this;
 
     this.message.setTitle("Sample activity title");
 
-    client.channels.find("name","to-do-list").send(this.message)
+    client.channels.find("name",this.channelToDo).send(this.message)
     .then(message => {
       this.messageId=message.id;
+      this.channelId=message.channel.id;
+      this.guildId=message.guild.id;
     }).catch(console.error);
   }
 
   getMessage(callback){
     if(this.messageId!=null){
-      this.client.channels.find("name","to-do-list").fetchMessage(this.messageId)
+      this.client.channels.find("name",this.channelToDo).fetchMessage(this.messageId)
       .then(message => {
         callback(message);
       })
@@ -70,48 +75,47 @@ module.exports = class Activity {
   }
 
   jsUcfirst(string){
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    if(string){
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    } else {
+      return "";
+    }
   }
 
   print(){
-    let response = this.jsUcfirst(this.description)+"\n";
-    for(var t=0;t<this.tasks.length;t++){
-      response += t +" - "+this.jsUcfirst(this.tasks[t])+"\n";
+    let response = this.jsUcfirst(this.message.description)+"\n";
+    for(var t=0;t<this.message.fields.length;t++){
+      response += t +" - "+this.jsUcfirst(this.message.fields[t])+"\n";
     }
     return response;
   }
 
-  save(object,callback){
-    var date = new Date();
-    var self=this;
-    var o = object;
-    o["description"]=self.description;
-    o["date"]=date.getTime();
-    o["id_user"]=self.owner.getId();
-    db.query("INSERT INTO activity SET ?",o,function(error, results, fields){
-      if (error) {
-        callback("unexpected error on activity insert");
-      } else {
-        var activityId=results.insertId;
-        var increment=0;
-        var o={
-          "id_activity":activityId
-        }
-        for(var t=0;t<self.tasks.length;t++){
-          o["description"]=self.tasks[t];
-          o["number"]=t;
-          db.query("INSERT INTO task SET ?",o,function(error, results, fields){
-            if (error) {
-              throw error;
-              callback("unexpected error on activity insert");
-            }
-            increment++;
-            if(increment==self.tasks.length){
-              callback("activity created successfully");
-            }
-          });
+  async save(o){
+    o["title"]=this.message.title;
+    o["description"]=this.message.description;
+    o["date"]=(new Date()).getTime();
+    o["id_user"]=this.owner.getId();
+    let results = await dbQuery("INSERT INTO activity SET ?",o);
+    console.log(results);
+    if(results){
+      var activityId=results.insertId;
+
+      o = { "id_activity":activityId };
+
+      for(var t=0;t<this.message.fields.length;t++){
+        o["title"]=this.message.fields[t].name;
+        o["description"]=this.message.fields[t].value;
+        o["number"]=t;
+        results = await dbQuery("INSERT INTO task SET ?",o);
+        console.log(results);
+        if(!results){
+          return "Unexpected error";
         }
       }
-    });
+
+      return "activity created successfully";
+    } else {
+      return "Unexpected error";
+    }
   }
 }
