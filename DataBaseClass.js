@@ -6,8 +6,9 @@
 const mysql = require('mysql');
 
 class DataBase {
+
   constructor(){
-    this.con=mysql.createConnection({
+    this.connection=mysql.createConnection({
       connectionLimit: 100,
       host: "localhost",
       user: "root",
@@ -18,20 +19,43 @@ class DataBase {
     this.start();
   }
   start(){
-    this.con.connect(function(err) {
+    this.connection.connect(function(err) {
       if (err) throw err;
       console.log("Connected!");
     });
   }
+  queryPromise(sql,args) {
+    return new Promise((resolve,reject ) => {
+      this.connection.query(sql,args,(err,rows) => {
+        if (err)
+          return reject(err);
+        resolve(rows);
+      });
+    });
+  }
+  close() {
+    return new Promise((resolve,reject) => {
+      this.connection.end(err => {
+        if (err)
+          return reject(err);
+        resolve();
+      });
+    });
+  }
 
-}
-
-const database = new DataBase();
-module.exports = {
-  dbupdate: function (string,object,callback){
-    database.con.query(string,object,callback);
-  },
-  dbquery: function (string,callback){
-    database.con.query(string,callback);
+  async query(sql,object){
+    let response;
+    try {
+      response = await this.queryPromise(sql,object);
+    } catch(e){
+      response = null;
+    }
+    return response;
   }
 }
+
+const database =new DataBase();
+
+exports.dbQuery = async function(sql,object){
+  return await database.query(sql,object);
+};

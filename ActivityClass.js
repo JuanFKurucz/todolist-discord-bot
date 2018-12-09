@@ -1,6 +1,6 @@
 'use strict';
 
-const {dbupdate} = require(__dirname+"/DataBaseClass.js");
+const db = require(__dirname+"/DataBaseClass.js");
 const Message = require('discord.js').RichEmbed;
 
 
@@ -88,7 +88,7 @@ module.exports = class Activity {
     o["description"]=self.description;
     o["date"]=date.getTime();
     o["id_user"]=self.owner.getId();
-    dbupdate("INSERT INTO activity SET ?",o,function(error, results, fields){
+    db.query("INSERT INTO activity SET ?",o,function(error, results, fields){
       if (error) {
         callback("unexpected error on activity insert");
       } else {
@@ -100,7 +100,7 @@ module.exports = class Activity {
         for(var t=0;t<self.tasks.length;t++){
           o["description"]=self.tasks[t];
           o["number"]=t;
-          dbupdate("INSERT INTO task SET ?",o,function(error, results, fields){
+          db.query("INSERT INTO task SET ?",o,function(error, results, fields){
             if (error) {
               throw error;
               callback("unexpected error on activity insert");

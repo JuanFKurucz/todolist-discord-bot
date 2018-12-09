@@ -1,7 +1,7 @@
 'use strict';
 
 const Activity = require(__dirname+"/ActivityClass.js");
-const {dbupdate} = require(__dirname+"/DataBaseClass.js");
+const { dbQuery } = require(__dirname+"/DataBaseClass.js");
 
 module.exports = class User {
   constructor(id) {
@@ -31,23 +31,18 @@ module.exports = class User {
     this.permission=p;
   }
 
-  update(callback){
+  async update(){
     var self=this;
-    dbupdate("SELECT * FROM user WHERE id_user = "+self.id,function(error, results, fields){
-      if (error) throw error;
-      if(results.length>0){
-        self.setPermission = results[0].permission;
-        callback(self);
-      } else {
-        var o = {
-          "id_user":self.id,
-          "permission":self.permission
-        };
-        dbupdate("INSERT INTO user SET ?",o,function(error, results, fields){
-          if (error) throw error;
-          callback(self);
-        });
-      }
-    });
+    let results = await dbQuery("SELECT * FROM user WHERE id_user = "+self.id);
+    if(results.length>0){
+      self.setPermission = results[0].permission;
+    } else {
+      var o = {
+        "id_user":self.id,
+        "permission":self.permission
+      };
+      results = await dbQuery("INSERT INTO user SET ?",o);
+    }
+    return self;
   }
 }

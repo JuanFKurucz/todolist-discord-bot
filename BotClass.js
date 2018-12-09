@@ -32,38 +32,34 @@ module.exports = class Bot {
 
   }
 
-  commandHandler(msg){
+  async commandHandler(msg){
     let response = "";
     let text = msg.content+"";
-    console.log("Message: "+text);
     var self = this;
-    this.ch.getUser(msg.author,function(user){
-      console.log(user);
-      if(text.indexOf(self.prefix)===0){
-        text=text.substring(self.prefix.length,text.length).toLowerCase();
-        var command = text.split(" ");
+    var user = await this.ch.getUser(msg.author);
+    if(text.indexOf(self.prefix)===0){
+      text=text.substring(self.prefix.length,text.length).toLowerCase();
+      var command = text.split(" ");
 
-        let call = self.ch.functionPrefix+command[0];
+      let call = self.ch.functionPrefix+command[0];
 
-        if(typeof self.ch[call] === 'function'){
-          response = self.ch[call](user,command,function(response){
-            if(response !== null && response !== "delete"){
-              response.setFooter(self.client.user.username);
-              response.setTimestamp(new Date());
-              msg.channel.send(response)
-              .then(message => console.log(`Sent message: ${message.content}`))
-              .catch(console.error);
-            } else if(response === "delete"){
-              msg.delete();
-            }
-          });
-        } else {
-          msg.channel.send("Unknown command")
+      if(typeof self.ch[call] === 'function'){
+        response = await self.ch[call](user,command);
+        if(response !== null && response !== "delete"){
+          response.setFooter(self.client.user.username);
+          response.setTimestamp(new Date());
+          msg.channel.send(response)
           .then(message => console.log(`Sent message: ${message.content}`))
           .catch(console.error);
+        } else if(response === "delete"){
+          msg.delete();
         }
+      } else {
+        msg.channel.send("Unknown command")
+        .then(message => console.log(`Sent message: ${message.content}`))
+        .catch(console.error);
       }
-    });
+    }
   }
 
   onMessage(msg){

@@ -10,7 +10,7 @@ and handles the message with commandHandler.
 const dump_channel = "519704135319289856";
 const User = require(__dirname+"/UserClass.js");
 const Await = require(__dirname+"/AwaitClass.js");
-const {dbquery,dbupdate} = require(__dirname+"/DataBaseClass.js");
+const { dbQuery } = require(__dirname+"/DataBaseClass.js");
 
 const Message = require('discord.js').RichEmbed;
 
@@ -29,7 +29,7 @@ module.exports = class CommandHandler {
   awaitMessageReactions(){
     var self = this;
     var channel = this.client.channels.find("name","to-do-list");
-    dbquery("SELECT id_activity, id_message FROM activity WHERE completed IS NULL",function(error, results, fields){
+    /*db.query("SELECT id_activity, id_message FROM activity WHERE completed IS NULL",function(error, results, fields){
       if(error){
         console.log(error);
       } else {
@@ -47,36 +47,36 @@ module.exports = class CommandHandler {
         }
         console.log(results);
       }
-    });
+    });*/
   }
 
-  getUser(info,callback){
+  async getUser(info){
     var memoryUser=this.users[info.id];
     if(!memoryUser){
       memoryUser = new User(info.id);
       this.users[info.id]=memoryUser;
     }
-    memoryUser.update(callback);
+    return await memoryUser.update();
   }
 
 
-  execute_info(user,command,callback){
+  async execute_info(user,command){
     var m = new Message();
-    dbquery("SELECT * FROM user WHERE id_user = "+user.id,function(error, results, fields){
-      if (error) {
-        m.setDescription("Unexpected error")
+    let results = await dbQuery("SELECT * FROM user WHERE id_user = "+user.id);
+    console.log(results);
+    if (!results) {
+      m.setDescription("Unexpected error")
+    } else {
+      if(results.length>0){
+        m.setDescription("<@!"+results[0].id_user+"> you have permission level "+results[0].permission);
       } else {
-        if(results.length>0){
-          m.setDescription("<@!"+results[0].id_user+"> you have permission level "+results[0].permission);
-        } else {
-          m.setDescription("User not found");
-        }
+        m.setDescription("User not found");
       }
-      callback(m);
-    });
+    }
+    return m;
   }
 
-  execute_add(user,command,callback){
+  async execute_add(user,command){
     var m = new Message();
     m.setTitle("Add activity");
     var activity = user.getActivity();
@@ -107,34 +107,32 @@ module.exports = class CommandHandler {
     //m.addBlankField();
     m.addField("Cancel creating the activity","Use '.cancel' to delete the current activity and stop creating it");
     m.addField("Save the activity and exit","Use '.end' to save the activity and exit the creation");
-    callback(m);
+    return m;
   }
 
-  execute_end(user,command,callback){
+  async execute_end(user,command){
     var m = new Message();
     m.setTitle("End activity");
     var activity = user.getActivity();
     if(activity===null){
       m.setDescription("<@!"+user.id+"> you are not creating an activity");
-      callback(m);
     } else {
       this.client.channels.find("name","to-do-list").send(activity.print())
-      .then(message => {
+      .then(async function(message){
         var o={
           "id_message":message.id,
           "id_channel":message.channel.id,
           "id_server":message.guild.id
         }
-        activity.save(o,function(response){
-          user.cancelActivity();
-          m.setDescription("<@!"+user.id+"> "+response);
-          callback(m);
-        });
+        var response = await activity.save(o);
+        user.cancelActivity();
+        m.setDescription("<@!"+user.id+"> "+response);
       }).catch(console.error);
     }
+    return m;
   }
 
-  execute_cancel(user,command,callback){
+  async execute_cancel(user,command){
     var m = new Message();
     m.setTitle("Cancel activity");
     var activity = user.getActivity();
@@ -144,7 +142,7 @@ module.exports = class CommandHandler {
       user.cancelActivity();
       m.setDescription("<@!"+user.id+"> activity was cancelled successfully");
     }
-    callback(m);
+    return m;
   }
 
 
@@ -159,23 +157,23 @@ module.exports = class CommandHandler {
     return c.join(" ");
   }
 
-  execute_title(user,command,callback){
+  async execute_title(user,command){
     var activity = user.getActivity();
     if(activity!==null){
       activity.setTitle(this.getRestOfCommand(command));
     }
-    callback("delete");
+    return "delete";
   }
 
-  execute_desc(user,command,callback){
+  async execute_desc(user,command){
     var activity = user.getActivity();
     if(activity!==null){
       activity.setDescription(this.getRestOfCommand(command));
     }
-    callback("delete");
+    return "delete";
   }
 
-  execute_taskt(user,command,callback){
+  async execute_taskt(user,command){
     var activity = user.getActivity();
     if(activity!==null){
       if(command.length>=3 && !isNaN(command[1])){
@@ -184,10 +182,10 @@ module.exports = class CommandHandler {
         activity.setTaskTitle(this.getRestOfCommand(command,1));
       }
     }
-    callback("delete");
+    return "delete";
   }
 
-  execute_taskd(user,command,callback){
+  async execute_taskd(user,command){
     var activity = user.getActivity();
     if(activity!==null){
       if(command.length>=3 && !isNaN(command[1])){
@@ -196,6 +194,6 @@ module.exports = class CommandHandler {
         activity.setTaskDescription(this.getRestOfCommand(command,1));
       }
     }
-    callback("delete");
+    return "delete";
   }
 }
