@@ -7,7 +7,6 @@ Every message from Discord is setn to read function, where it creates the player
 and handles the message with commandHandler.
 **/
 
-const dump_channel = "519704135319289856";
 const User = require(__dirname+"/UserClass.js");
 const Await = require(__dirname+"/AwaitClass.js");
 const { dbQuery } = require(__dirname+"/DataBaseClass.js");
