@@ -27,19 +27,21 @@ module.exports = class Bot {
     this.client.on('ready', () => {
       console.log(`Logged in as ${this.client.user.tag}!`);
 
-
       var channel = this.client.channels.find("name","general");
       channel.fetchMessages()
-      .then(message => console.log(message.content))
       .catch(console.error);
-      this.ch.awaitMessageReactions();
     });
 
     this.client.on('message', msg => {
       this.onMessage(msg);
     });
 
-    this.client.on('messageReactionAdd', (messageReaction, user) => console.log(messageReaction, user))
+    this.client.on('messageReactionAdd', (messageReaction, user) => {
+      this.ch.awaitMessageReactions(messageReaction,user,true);
+    })
+    this.client.on('messageReactionRemove', (messageReaction, user) => {
+      this.ch.awaitMessageReactions(messageReaction,user,false);
+    })
 
     this.client.login(token);
   }
