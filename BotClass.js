@@ -58,19 +58,23 @@ module.exports = class Bot {
   async commandHandler(msg){
     let response = null;
     let text = msg.content+"";
-    let user = await this.ch.getUser(msg.author);
+    let user = await this.ch.getUser(msg);
     if(this.isCommand(text)){
       var command = this.parseCommand(text);
       let call = this.ch.functionPrefix+command[0];
 
       if(typeof this.ch[call] === 'function'){
-        response = await this.ch[call](user,command);
-        if(response !== null && response !== "delete"){
-          response.setFooter(this.client.user.username);
-          response.setTimestamp(new Date());
-          this.sendMessage(msg.channel,response);
-        } else if(response === "delete"){
-          msg.delete();
+        if(await user.canExecute(command[0])){
+          response = await this.ch[call](user,command);
+          if(response !== null && response !== "delete"){
+            response.setFooter(this.client.user.username);
+            response.setTimestamp(new Date());
+            this.sendMessage(msg.channel,response);
+          } else if(response === "delete"){
+            msg.delete();
+          }
+        } else {
+          this.sendMessage(msg.channel,"You don't have enough permissions to execute this command");
         }
       } else {
         this.sendMessage(msg.channel,"Unknown command");
