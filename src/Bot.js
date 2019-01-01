@@ -124,7 +124,7 @@ module.exports = class Bot {
     const debugChannels = config("debuggChannels");
     if((debugChannels.indexOf(msg.channel.id)!==-1 || this.debugMode === false) && msg.hasOwnProperty("author") && !msg.author.bot){
 
-      const user = await this.logic.getUser(msg.author);
+      const user = await this.logic.getUser(msg);
       this.logic.onMessage(user); //handles what to do when a user send a message (Ex: gives cookies);
       const response=await this.commandHandler(msg,user);
 

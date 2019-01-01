@@ -5,7 +5,7 @@
     "host": "localhost",
     "user": "root",
     "password": "",
-    "database": "notagame",
+    "database": "todolist-bot",
     "debug": false
   }]
 }

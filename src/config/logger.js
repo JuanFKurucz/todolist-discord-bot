@@ -1,5 +1,5 @@
 {
-  "level":3,
+  "level":5,
   "maxTrace":1,
   "style":{
      "type":{
