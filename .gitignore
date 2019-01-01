@@ -59,3 +59,12 @@ typings/
 
 # next.js build output
 .next
+
+# exclude everything
+output/*
+emojis/*
+
+# exception to the rule
+!output/.gitkeep
+
+token.json
