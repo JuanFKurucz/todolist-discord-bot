@@ -129,7 +129,11 @@ module.exports = class Bot {
       const response=await this.commandHandler(msg,user);
 
       if(response!==null){
-        await this.sendMessage(msg,response.print(),user);
+        if(response.isReply()){
+          msg.reply(response.print());
+        } else {
+          await this.sendMessage(msg,response.print(),user);
+        }
       }
 
       user.emptyMessageLang();

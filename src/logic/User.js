@@ -1,6 +1,7 @@
 "use strict";
 
-const Language = require("../Language.js");
+const Language = require("../Language.js"),
+      Activity = require("./items/Activity.js");
 
 module.exports = class User {
   constructor(id) {
@@ -69,6 +70,14 @@ module.exports = class User {
 
   setInfo(info){
     this.info=info;
+  }
+
+  startActivity(){
+    if(this.activity === null){
+      this.activity = new Activity();
+      return true;
+    }
+    return false;
   }
 
 };

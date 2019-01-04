@@ -9,8 +9,14 @@ module.exports = class AddCommand extends Command {
 
   async doExecute(m,user,command){
     console.time();
-    m.setTitle("Hello dah");
-    m.setDescription("Am I a joke to you?");
+
+    if(user.startActivity()){
+      m.setDescription("A private message has been send to you with the activity creation.");
+    } else {
+      m.setDescription("You already have an activity started. Please cancel or finish it first");
+    }
+
+    m.setTitle("Adding an activity");
     console.time();
   }
 };

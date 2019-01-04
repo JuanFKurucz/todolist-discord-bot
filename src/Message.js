@@ -9,6 +9,11 @@ module.exports = class Message {
     this.language = this.owner.getLanguage();
     this.message = new RichEmbed();
     this.message.setFooter(this.owner.getName(),this.owner.getAvatar());
+    this.reply = false;
+  }
+
+  setReply(b){
+    this.reply = b === true;
   }
 
   parseText(text,data=[]){
@@ -67,6 +72,10 @@ module.exports = class Message {
         this.parseText(realDescription.text,realDescription.data)
       );
     }
+  }
+
+  isReply(){
+    return this.reply;
   }
 
   print(){
