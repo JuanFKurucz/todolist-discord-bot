@@ -3,9 +3,9 @@
 const Task = require("./Task.js");
 
 module.exports = class Activity {
-  constructor(name,description="") {
-    this.name = name;
-    this.description = description;
+  constructor() {
+    this.name = "";
+    this.description = "";
     this.tasks={};
     this.dependencies={
       "task":[],
@@ -49,6 +49,6 @@ module.exports = class Activity {
 
   addDependencie(type,id){
     const parsedType = type.toLowerCase();
-    (this.tasks.hasOwnProperty(parsedType) === true && this.dependencies[parsedType].indexOf(id) === -1) ? this.dependencies[parsedType].push(id) : null; 
+    (this.tasks.hasOwnProperty(parsedType) === true && this.dependencies[parsedType].indexOf(id) === -1) ? this.dependencies[parsedType].push(id) : null;
   }
 };

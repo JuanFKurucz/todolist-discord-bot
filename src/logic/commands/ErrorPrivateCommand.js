@@ -9,10 +9,8 @@ module.exports = class ErrorPrivateCommand extends Command {
   }
 
   async doExecute(m,user,command){
-    console.time();
     const prefix = require("../../Bot.js").get().getPrefix();
     m.setTitle("errorprivate_title");
     m.setDescription("errorprivate_message",[prefix,"^command_help^"]);
-    console.time();
   }
 };

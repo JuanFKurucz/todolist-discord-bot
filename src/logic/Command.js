@@ -34,11 +34,13 @@ module.exports = class Command {
   }
 
   execute(m,user,command){
+    console.time();
     if(user.getPermission()>=this.permission){
       this.doExecute(m,user,command);
     } else {
       m.setTitle("Not enough permissions");
       m.setDescription("You don't have enough permissions to use this command. (Command permission level: "+this.permission+")");
     }
+    console.time();
   }
 };

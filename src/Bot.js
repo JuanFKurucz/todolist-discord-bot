@@ -132,7 +132,8 @@ module.exports = class Bot {
 
       if(response!==null){
         if(response.isReply()){
-          msg.reply(response.print());
+          msg.author.send(response.print());
+          msg.reply("check your dm's!");
         } else {
           await this.sendMessage(msg,response.print(),user);
         }

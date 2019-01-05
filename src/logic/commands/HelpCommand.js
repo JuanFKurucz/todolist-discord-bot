@@ -10,7 +10,6 @@ module.exports = class HelpCommand extends Command {
   }
 
   async doExecute(m,user,command){
-    console.time();
     const bot = require("../../Bot.js").get(),
         commandList = bot.logic.getCommands();
 
@@ -26,6 +25,5 @@ module.exports = class HelpCommand extends Command {
         }
       );
     }
-    console.time();
   }
 };
