@@ -2,17 +2,17 @@
 
 const Command = require("../Command.js");
 
-module.exports = class ErrorCommand extends Command {
+module.exports = class ErrorPrivateCommand extends Command {
   constructor(id,name) {
     super(id,name);
-    this.addChannel("text");
+    this.addChannel("dm");
   }
 
   async doExecute(m,user,command){
     console.time();
     const prefix = require("../../Bot.js").get().getPrefix();
-    m.setTitle("error_title");
-    m.setDescription("error_message",[prefix,"^command_help^"]);
+    m.setTitle("errorprivate_title");
+    m.setDescription("errorprivate_message",[prefix,"^command_help^"]);
     console.time();
   }
 };

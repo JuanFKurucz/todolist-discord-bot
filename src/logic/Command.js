@@ -6,6 +6,19 @@ module.exports = class Command {
     this.name=name;
     this.description=description;
     this.permission = 0;
+    this.channels = [];
+  }
+
+  canUseChannel(c){
+    const text = c.toLowerCase();
+    return this.channels.indexOf(text) !== -1;
+  }
+
+  addChannel(c){
+    const text = c.toLowerCase();
+    if(!this.canUseChannel(text)){
+      this.channels.push(text);
+    }
   }
 
   getName(){

@@ -5,6 +5,8 @@ const Command = require("../Command.js");
 module.exports = class HelpCommand extends Command {
   constructor(id,name) {
     super(id,name);
+    this.addChannel("dm");
+    this.addChannel("text");
   }
 
   async doExecute(m,user,command){

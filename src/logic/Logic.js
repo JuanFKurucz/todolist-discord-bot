@@ -80,17 +80,24 @@ module.exports = class Logic {
     return this.commands;
   }
 
-  getCommand(command,user){
+  getCommand(command,user,channelType){
     const lan = user.getLanguage();
-    let realCommand="command_error";
+    let response=this.commands["command_error"];
+
     if(this.lanCommands.hasOwnProperty(lan) === true){
+
       if(this.lanCommands[lan].hasOwnProperty(command)===true){
-        realCommand=this.lanCommands[lan][command];
+        response = this.lanCommands[lan][command];
       } else if(this.commands.hasOwnProperty("command_"+command)===true){
-        return this.commands["command_"+command];
+        response = this.commands["command_"+command];
+      }
+
+      if(response.getName() !== "command_error" && response.canUseChannel(channelType.toLowerCase()) === false){
+        response=this.commands["command_errorprivate"];
       }
     }
-    return this.commands[realCommand];
+
+    return response;
   }
 
   async getUser(msg){
@@ -102,12 +109,12 @@ module.exports = class Logic {
       });
     }
 
-    if(this.guilds.hasOwnProperty(msg.guild.id) === false){
+    if(msg.hasOwnProperty("guild") && this.guilds.hasOwnProperty(msg.guild.id) === false){
       this.guilds[msg.guild.id] = true;
       await dbQuery("INSERT IGNORE INTO guild SET ?",{
         "id_guild":msg.guild.id
       });
-    }      
+    }
 
     this.users[info.id].setInfo(info);
     return this.users[info.id];

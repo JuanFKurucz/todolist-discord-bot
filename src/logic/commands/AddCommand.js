@@ -5,6 +5,7 @@ const Command = require("../Command.js");
 module.exports = class AddCommand extends Command {
   constructor(id,name) {
     super(id,name);
+    this.addChannel("text");
   }
 
   async doExecute(m,user,command){

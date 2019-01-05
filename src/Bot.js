@@ -87,12 +87,12 @@ module.exports = class Bot {
     With this Message it will decide if the content of the message is a command for the bot (if it starts with the prefix).
     It will execute the command for the prefix if it has one, if it doesn't it will do nothing instead.
   **/
-  async commandHandler(msg,user){
+  async commandHandler(msg,user,channelType){
     const text = msg.content+"";
     let response = null,
-        command;
+        command = null,
+        permissionLevel = (msg.hasOwnProperty("member") && msg.member !== null && msg.member.hasPermission("ADMINISTRATOR")) ? 1 : 0;
 
-    let permissionLevel = (msg.member.hasPermission("ADMINISTRATOR")) ? 1 : 0;
     user.setPermission(permissionLevel);
 
     if(this.isACommand(text)){
@@ -104,7 +104,7 @@ module.exports = class Bot {
 
       console.time();
 
-      await this.logic.getCommand(command[0],user).execute(response,user,command); //gets the command using the first string in the splitteed message and executes it
+      await this.logic.getCommand(command[0],user,channelType).execute(response,user,command); //gets the command using the first string in the splitteed message and executes it
     }
 
     return response;
@@ -121,12 +121,14 @@ module.exports = class Bot {
   }
 
   async onMessage(msg){
-    const debugChannels = config("debuggChannels");
-    if((debugChannels.indexOf(msg.channel.id)!==-1 || this.debugMode === false) && msg.hasOwnProperty("author") && !msg.author.bot){
+    const debugChannels = config("debuggChannels"),
+          channelType = msg.channel.type;
+
+    if((debugChannels[channelType].indexOf(msg.channel.id)!==-1 || this.debugMode === false) && msg.hasOwnProperty("author") && !msg.author.bot){
 
       const user = await this.logic.getUser(msg);
       this.logic.onMessage(user); //handles what to do when a user send a message (Ex: gives cookies);
-      const response=await this.commandHandler(msg,user);
+      const response=await this.commandHandler(msg,user,channelType);
 
       if(response!==null){
         if(response.isReply()){
