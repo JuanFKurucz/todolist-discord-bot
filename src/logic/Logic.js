@@ -81,20 +81,23 @@ module.exports = class Logic {
   }
 
   getCommand(command,user,channelType){
-    const lan = user.getLanguage();
-    let response=this.commands["command_error"];
+    console.info(this.commands);
+    const lan = user.getLanguage(),
+          type = channelType.toLowerCase(),
+          commandText = "command_"+command;
+    let response=this.commands["global"]["command_error"];
 
-    if(this.lanCommands.hasOwnProperty(lan) === true){
+    /*if(this.lanCommands.hasOwnProperty(lan) === true && this.lanCommands[lan].hasOwnProperty(command)===true){
+      response = this.lanCommands[lan][command];
+    } else */
+    if(this.commands[type].hasOwnProperty(commandText)===true){
+      response = this.commands[type][commandText];
+    } else if(this.commands["global"].hasOwnProperty(commandText)===true){
+      response = this.commands["global"][commandText];
+    }
 
-      if(this.lanCommands[lan].hasOwnProperty(command)===true){
-        response = this.lanCommands[lan][command];
-      } else if(this.commands.hasOwnProperty("command_"+command)===true){
-        response = this.commands["command_"+command];
-      }
-
-      if(response.getName() !== "command_error" && response.canUseChannel(channelType.toLowerCase()) === false){
-        response=this.commands["command_errorprivate"];
-      }
+    if(response.getName() !== "command_error" && response.canUseChannel(type) === false){
+      response=this.commands["dm"]["command_errordm"];
     }
 
     return response;

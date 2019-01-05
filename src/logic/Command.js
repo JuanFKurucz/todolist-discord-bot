@@ -21,6 +21,10 @@ module.exports = class Command {
     }
   }
 
+  getChannels(){
+    return this.channels;
+  }
+
   getName(){
     return "command_"+this.name;
   }

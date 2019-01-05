@@ -1,8 +1,8 @@
 "use strict";
 
-const Command = require("../Command.js");
+const TextAbstractCommand = require("../TextAbstractCommand.js");
 
-module.exports = class AddCommand extends Command {
+module.exports = class AddCommand extends TextAbstractCommand {
   constructor(id,name) {
     super(id,name);
     this.addChannel("text");

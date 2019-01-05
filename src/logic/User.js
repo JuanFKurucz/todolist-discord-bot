@@ -80,4 +80,7 @@ module.exports = class User {
     return false;
   }
 
+  getActivity(){
+    return this.activity;
+  }
 };
